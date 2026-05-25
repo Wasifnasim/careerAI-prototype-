@@ -1,2 +1,3 @@
 # careerAI-prototype-
-<img width="245" height="332" alt="image" src="https://github.com/user-attachments/assets/d2de23eb-0246-4da7-9db8-3a53b718b638" />
+<img width="648" height="710" alt="image" src="https://github.com/user-attachments/assets/81813497-f81f-47b2-950b-59779f2d52e5" />
+
