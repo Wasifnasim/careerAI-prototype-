@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerAI - Student Assessment Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: #151d30;
+            --accent-neon: #00f2fe;
+            --text-main: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-neon);
+            margin-bottom: 30px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #1f293d;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-neon);
+            border: none;
+            border-radius: 6px;
+            color: #0b0f19;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        }
+
+        .result-box {
+            background: #111827;
+            padding: 15px;
+            border-left: 4px solid var(--accent-neon);
+            border-radius: 4px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CareerAI Diagnostic Dashboard</h1>
+    
+    <div class="grid-layout">
+        <div class="card">
+            <h3>Student Metric Inputs</h3>
+            <form id="assessmentForm">
+                <div class="form-group"><label>Math Marks (0-100)</label><input type="number" id="math" value="85" required></div>
+                <div class="form-group"><label>Physics Marks (0-100)</label><input type="number" id="physics" value="80" required></div>
+                <div class="form-group"><label>Chemistry Marks (0-100)</label><input type="number" id="chemistry" value="75" required></div>
+                <div class="form-group"><label>Computer Science Marks (0-100)</label><input type="number" id="cs" value="90" required></div>
+                <div class="form-group"><label>Coding Interest (0-100)</label><input type="number" id="coding_interest" value="95" required></div>
+                <div class="form-group"><label>Analytical Interest (0-100)</label><input type="number" id="analytical_interest" value="85" required></div>
+                <div class="form-group"><label>Machine Interest (0-100)</label><input type="number" id="machine_interest" value="30" required></div>
+                <div class="form-group"><label>Building Interest (0-100)</label><input type="number" id="building_interest" value="20" required></div>
+                <div class="form-group"><label>Electronics Interest (0-100)</label><input type="number" id="electronics_interest" value="40" required></div>
+                <div class="form-group"><label>Logic Aptitude (0-100)</label><input type="number" id="logic_aptitude" value="88" required></div>
+                <button type="button" onclick="submitAssessment()">Analyze Career Fit</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>System Analytics Summary</h3>
+            <div id="outputContainer">
+                <p style="color: var(--text-dim);">Submit the form on the left to review predictive hybrid output metrics instantly.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function submitAssessment() {
+        const payload = {
+            math: parseInt(document.getElementById('math').value),
+            physics: parseInt(document.getElementById('physics').value),
+            chemistry: parseInt(document.getElementById('chemistry').value),
+            cs: parseInt(document.getElementById('cs').value),
+            coding_interest: parseInt(document.getElementById('coding_interest').value),
+            analytical_interest: parseInt(document.getElementById('analytical_interest').value),
+            machine_interest: parseInt(document.getElementById('machine_interest').value),
+            building_interest: parseInt(document.getElementById('building_interest').value),
+            electronics_interest: parseInt(document.getElementById('electronics_interest').value),
+            logic_aptitude: parseInt(document.getElementById('logic_aptitude').value)
+        };
+
+        const outputContainer = document.getElementById('outputContainer');
+        outputContainer.innerHTML = "<p>Processing diagnostic models...</p>";
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if(data.status === "success") {
+                let rankingsHTML = '';
+                data.detailed_rankings.slice(0, 3).forEach((item, index) => {
+                    rankingsHTML += `<li><strong>Rank ${index+1}:</strong> ${item.career} (${item.match_percentage}% Score)</li>`;
+                });
+
+                // Clear and render all elements including the AI Counselor text safely
+                outputContainer.innerHTML = `
+                    <div class="result-box">
+                        <h4 style="color: var(--accent-neon); margin-top:0;">Top ML Match Recommendation:</h4>
+                        <p style="font-size: 18px; font-weight: bold; margin-bottom:5px;">${data.ml_recommended_career}</p>
+                        <p style="color: var(--text-dim); margin-top:0; font-size:13px;">Model Confidence Factor: ${data.ml_confidence}</p>
+                    </div>
+                    
+                    <div class="result-box">
+                        <h4 style="color: var(--accent-neon); margin-top:0;">🤖 AI Counselor Insights:</h4>
+                        <p style="margin-bottom:0; line-height: 1.5; font-size: 14px;">
+                            ${data.ai_explanation || `Based on your high logical scores, ${data.ml_recommended_career} is an ideal choice.`}
+                        </p>
+                    </div>
+                    
+                    <div class="result-box">
+                        <h4 style="color: var(--accent-neon); margin-top:0;">Rule Engine Alternative Matrices:</h4>
+                        <ul style="padding-left: 20px; margin-bottom: 0;">${rankingsHTML}</ul>
+                    </div>
+                `;
+            } else {
+                outputContainer.innerHTML = "<p style='color: red;'>Error generating output profiling structures.</p>";
+            }
+        } catch (error) {
+            outputContainer.innerHTML = "<p style='color: red;'>Could not reach the backend server. Make sure FastAPI is running.</p>";
+        }
+    }
+</script>
+
+</body>
+</html>
